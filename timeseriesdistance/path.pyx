@@ -18,7 +18,10 @@ cdef inline lpc(
         ((i-1, j  ), C_HV*D[i-1, j  ]),
     )
 
-def D_from_c(c, C_D, C_HV):
+def D_from_c(
+    np.ndarray[np.float64_t, ndim=2] c,
+    double C_D, double C_HV
+):
     """
     c : float matrix
     """
@@ -44,14 +47,18 @@ def D_from_c(c, C_D, C_HV):
 
     return D
 
-def min_path(D, C_D, C_HV):
+def min_path(
+    np.ndarray[np.float64_t, ndim=2] D,
+    double C_D, double C_HV
+):
     """
     D : float matrix
     """
-    i, j = map(lambda size: size-1, D.shape)
+    cdef Py_ssize_t i = D.shape[0] - 1
+    cdef Py_ssize_t j = D.shape[1] - 1
+
     path = [(i, j)]
     while not (i == 0 and j == 0):
-        assert(i>=0 and j>=0)
         if i == 0:
             j -= 1
         elif j == 0:

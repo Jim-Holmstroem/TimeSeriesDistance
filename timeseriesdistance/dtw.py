@@ -56,13 +56,11 @@ class DTW(Metric):
         # Monotonicity condition: i<j => n_i<n_j AND m_i<m_j
         # Step size  condition: p_{l-1}-p_l \in {(1,1), (1,0), (0,1)}  # NOTE just for now
 
-        print(c)
         D = D_from_c(
             c=c,
             C_D=self.C_D,
             C_HV=self.C_HV,
         )
-        print(D)
         # NOTE expanded recursion
         # TODO write down the recursive algorithm
         # find the minimum path in a gready manner (is this really the minimum? TODO)
