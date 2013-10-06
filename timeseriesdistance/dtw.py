@@ -5,32 +5,54 @@ from functools import partial
 from operator import itemgetter
 
 import numpy as np
-import scipy as sp
+from scipy import sparse
+
+import matplotlib.pyplot as plt
 
 from metric import Metric
+
+
+def path_2_matrix(path, shape):
+    """
+    """
+    matrix = sparse.coo_matrix(
+        (
+            np.ones(len(path)),
+            zip(*path),
+        ),
+        shape=shape,
+    ).todense()
+
+    return matrix
+
 
 class DTW(Metric):
     """
 
     [1] Dynamic Time Warping Algorithm Review, Pavel Senin
+    [2] Time Warping, Springer, http://www.springer.com/978-3-540-74047-6
 
     Parameters
     ----------
     f : ufunc
         Inner distance (or what it's called)
     """
-    def __init__(self, f=None):
+    def __init__(self, f=np.square, verbose=False):
         self.f = f
+        self.verbose = verbose
 
     def __call__(self, a, b):
         a, b = map(np.asarray, [a, b])
         #local_cost_matrix
-        c = np.square(np.subtract.outer(a, b))  # f(|..|)
+        c = self.f(np.subtract.outer(a, b))  # f(|..|)
         # Optimal warping path p_i = (m_i, n_i):
         #
         # Boundary condition: p_1 = (1,1), p_K = (M, N)
         # Monotonicity condition: i<j => n_i<n_j AND m_i<m_j
         # Step size  condition: p_{l-1}-p_l \in {(1,1), (1,0), (0,1)}  # NOTE just for now
+
+        if self.verbose:
+            plt.imshow(c.T, interpolation='nearest')
 
         D = np.copy(c)
 
@@ -60,20 +82,18 @@ class DTW(Metric):
             product(*map(partial(xrange, 1), map(len, [a, b])))
         ))
 
-        print("D=\n", D)
 
         # NOTE expanded recursion
         # TODO write down the recursive algorithm
         # find the minimum path in a gready manner (is this really the minimum? TODO)
         i, j = map(lambda size: size-1, c.shape)
         path = [(i, j)]
-        while i > 0 and j > 0:
-            from warnings import warn
-            warn('somethings fishy here')
+        while not (i == 0 and j == 0):
+            assert(i>=0 and j>=0)
             if i == 0:
-                j -= 0
+                j -= 1
             elif j == 0:
-                i -= 0
+                i -= 1
             else:
                 min_ = lpc(D, i, j)
                 i, j = min(
@@ -81,22 +101,14 @@ class DTW(Metric):
                     key=itemgetter(1)
                 )[0]
             path.append((i, j))
-        print(i, j)
-        print("path=\n",
-            sp.sparse.coo_matrix(
-                (
-                    np.ones(len(path)),
-                    zip(*path),
-                ),
-                shape=c.shape,
-            ).todense()
-        )
-        return path
 
-DTW()(range(10), range(8))
-DTW()(range(10), range(10))
+        path_matrix = path_2_matrix(path, c.shape)
 
-ts1 =   [1,1,2,3,2,0]
-ts2 = [0,1,1,2,3,2,1]
-DTW()(ts1, ts2)
+        total_cost = np.sum(map(c.__getitem__, path))
 
+        if verbose:
+            plt.plot(*zip(*path), color='red', linewidth=3.0)
+            plt.title("total_cost={}".format(total_cost))
+            plt.show()
+
+        return total_cost
