@@ -4,25 +4,10 @@ from itertools import starmap, product
 from functools import partial
 from operator import itemgetter
 
-from abc import abstractmethod, ABCMeta
-
 import numpy as np
 import scipy as sp
 
-class Metric(object):  # TODO move it out
-    __metaclass__ = ABCMeta
-    @abstractmethod
-    def __call__(self, a, b):
-        """a, b is time series wich have the same time sampling.
-
-        Parameters
-        ----------
-        a : array, shape (M, 1)
-
-        b : array, shape (N, 1)
-
-        """
-        pass
+from metric import Metric
 
 class DTW(Metric):
     """
@@ -84,7 +69,7 @@ class DTW(Metric):
         path = [(i, j)]
         while i > 0 and j > 0:
             from warnings import warn
-            warn('somethings fishy here')j
+            warn('somethings fishy here')
             if i == 0:
                 j -= 0
             elif j == 0:
