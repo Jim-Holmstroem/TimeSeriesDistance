@@ -9,16 +9,25 @@ from scipy.io import wavfile
 
 from ..dtw import DTW
 
+def downsample(data, w=512):
+    data = data[:w*(data.size//w)]
+    downsampled_data = np.mean(data.reshape((-1, w)), axis=-1)
+
+    return downsampled_data
+
 def test_wav():
     # http://labrosa.ee.columbia.edu/matlab/dtw/
 
-    test1, test2 = map(itemgetter(1), map(
+    test1, test2 = map(downsample, map(itemgetter(1), map(
         wavfile.read,
         map(
             "../data/{}.wav".format,
             ["test1", "test2"]
         )
-    ))
+    )))
+
+    
+
     assert_greater(DTW(verbose=True)(test1, test2), 0)
 
 def test_trivial():

@@ -53,6 +53,7 @@ class DTW(Metric):
 
         if self.verbose:
             plt.imshow(c.T, interpolation='nearest')
+            plt.show()
 
         D = np.copy(c)
 
@@ -106,7 +107,7 @@ class DTW(Metric):
 
         total_cost = np.sum(map(c.__getitem__, path))
 
-        if verbose:
+        if self.verbose:
             plt.plot(*zip(*path), color='red', linewidth=3.0)
             plt.title("total_cost={}".format(total_cost))
             plt.show()
