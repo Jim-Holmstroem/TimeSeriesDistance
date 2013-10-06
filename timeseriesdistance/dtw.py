@@ -9,7 +9,7 @@ from scipy import sparse
 
 import matplotlib.pyplot as plt
 
-from metric import Metric
+from timeseriesdistance.metric import Metric
 
 
 def path_2_matrix(path, shape):
@@ -37,7 +37,7 @@ class DTW(Metric):
     f : ufunc
         Inner distance (or what it's called)
     """
-    def __init__(self, C_HV=1, C_D=1, f=np.square, verbose=False):
+    def __init__(self, C_HV=1, C_D=10, f=np.square, verbose=False):
         self.f = f
         self.verbose = verbose
         self.C_HV = C_HV

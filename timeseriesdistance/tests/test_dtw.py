@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 
+from functools import partial
 from operator import itemgetter
 
 from nose.tools import assert_equal, assert_greater
@@ -7,7 +8,7 @@ from nose.tools import assert_equal, assert_greater
 import numpy  as np
 from scipy.io import wavfile
 
-from ..dtw import DTW
+from timeseriesdistance.dtw import DTW
 
 def downsample(data, w=16):
     """ could use np.add.reduceat but a bit quirky
@@ -19,12 +20,14 @@ def downsample(data, w=16):
 
 def test_wav():
     # http://labrosa.ee.columbia.edu/matlab/dtw/
-
+    import os.path
+    data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
+    print(data_dir)
     test1, test2 = map(downsample, map(itemgetter(1), map(
         wavfile.read,
         map(
-            "../data/{}.wav".format,
-            ["test1", "test2"]
+            partial(os.path.join, data_dir),
+            ["test1.wav", "test2.wav"]
         )
     )))
 
