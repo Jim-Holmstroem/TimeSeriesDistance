@@ -9,8 +9,10 @@ from scipy.io import wavfile
 
 from ..dtw import DTW
 
-def downsample(data, w=512):
-    data = data[:w*(data.size//w)]
+def downsample(data, w=16):
+    """ could use np.add.reduceat but a bit quirky
+    """
+    data = data[:w * (data.size // w)]
     downsampled_data = np.mean(data.reshape((-1, w)), axis=-1)
 
     return downsampled_data
@@ -26,8 +28,6 @@ def test_wav():
         )
     )))
 
-    
-
     assert_greater(DTW(verbose=True)(test1, test2), 0)
 
 def test_trivial():
@@ -40,4 +40,3 @@ def test_simple():
     ts1 =   [1,1,2,3,2,0]
     ts2 = [0,1,1,2,3,2,1]
     assert_greater(DTW()(ts1, ts2), 0)
-

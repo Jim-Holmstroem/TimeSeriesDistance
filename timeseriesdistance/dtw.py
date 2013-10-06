@@ -37,9 +37,11 @@ class DTW(Metric):
     f : ufunc
         Inner distance (or what it's called)
     """
-    def __init__(self, f=np.square, verbose=False):
+    def __init__(self, C_HV=1, C_D=1, f=np.square, verbose=False):
         self.f = f
         self.verbose = verbose
+        self.C_HV = C_HV
+        self.C_D = C_D
 
     def __call__(self, a, b):
         a, b = map(np.asarray, [a, b])
@@ -51,9 +53,6 @@ class DTW(Metric):
         # Monotonicity condition: i<j => n_i<n_j AND m_i<m_j
         # Step size  condition: p_{l-1}-p_l \in {(1,1), (1,0), (0,1)}  # NOTE just for now
 
-        if self.verbose:
-            plt.imshow(c.T, interpolation='nearest')
-            plt.show()
 
         D = np.copy(c)
 
@@ -63,9 +62,9 @@ class DTW(Metric):
 
         def lpc(D, i, j): # local path constraint
             return (
-                ((i-1, j-1), D[i-1, j-1]),
-                ((i  , j-1), D[i  , j-1]),
-                ((i-1, j  ), D[i-1, j  ]),
+                ((i-1, j-1), self.C_D *D[i-1, j-1]),
+                ((i  , j-1), self.C_HV*D[i  , j-1]),
+                ((i-1, j  ), self.C_HV*D[i-1, j  ]),
             )
 
         #NOTE couldn't find any vectorization that solved this
@@ -108,7 +107,9 @@ class DTW(Metric):
         total_cost = np.sum(map(c.__getitem__, path))
 
         if self.verbose:
-            plt.plot(*zip(*path), color='red', linewidth=3.0)
+            plt.hold(True)
+            plt.imshow(c.T, interpolation='nearest')
+            plt.plot(*zip(*path), color='red', linewidth=1.0)
             plt.title("total_cost={}".format(total_cost))
             plt.show()
 
