@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from timeseriesdistance.metric import Metric
 
+from timeseriesdistance.path import lpc, D_from_c, min_path
 
 def path_2_matrix(path, shape):
     """
@@ -53,54 +54,21 @@ class DTW(Metric):
         # Monotonicity condition: i<j => n_i<n_j AND m_i<m_j
         # Step size  condition: p_{l-1}-p_l \in {(1,1), (1,0), (0,1)}  # NOTE just for now
 
-
-        D = np.copy(c)
-
-        D[0, 0] = 0
-        np.cumsum(D[:, 0], out=D[:, 0])
-        np.cumsum(D[0, :], out=D[0, :])
-
-        def lpc(D, i, j): # local path constraint
-            return (
-                ((i-1, j-1), self.C_D *D[i-1, j-1]),
-                ((i  , j-1), self.C_HV*D[i  , j-1]),
-                ((i-1, j  ), self.C_HV*D[i-1, j  ]),
-            )
-
-        #NOTE couldn't find any vectorization that solved this
-        # tried with stuff like np.minimum(D[1:, i], D[:-1, i], out=D[1:, i]) to basically try todo cummin
-        def foo(D, i, j):  # NOTE sideeffect only, and order dependent
-            # int, int -> () , Monad how?
-            min_ = lpc(D, i, j)
-            D[i, j] += min(
-                min_,
-                key=itemgetter(1)
-            )[1]
-
-        list(starmap(
-            partial(foo, D),
-            product(*map(partial(xrange, 1), map(len, [a, b])))
-        ))
-
+        D = D_from_c(
+            c=c,
+            C_D=self.C_D,
+            C_HV=self.C_HV,
+        )
 
         # NOTE expanded recursion
         # TODO write down the recursive algorithm
         # find the minimum path in a gready manner (is this really the minimum? TODO)
-        i, j = map(lambda size: size-1, c.shape)
-        path = [(i, j)]
-        while not (i == 0 and j == 0):
-            assert(i>=0 and j>=0)
-            if i == 0:
-                j -= 1
-            elif j == 0:
-                i -= 1
-            else:
-                min_ = lpc(D, i, j)
-                i, j = min(
-                    min_,
-                    key=itemgetter(1)
-                )[0]
-            path.append((i, j))
+
+        path = min_path(
+            D=D,
+            C_D=self.C_D,
+            C_HV=self.C_HV
+        )
 
         path_matrix = path_2_matrix(path, c.shape)
 

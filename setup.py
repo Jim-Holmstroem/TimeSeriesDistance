@@ -4,22 +4,21 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
-#from setuptools import find_packages
-
-VERSION = '0.02'
+VERSION = '0.05'
 
 extensions = [
-   Extension("timeseriesdistance.hellocython", ['timeseriesdistance/hellocython.pyx']),
+    Extension(
+        "timeseriesdistance.path",
+        ['timeseriesdistance/path.pyx']
+    ),
 ]
-
-print(map(repr, extensions))
 
 setup(
     name='TimeSeriesDistance',
     description='Distance measures for time series.',
     author='Jim Holmstrom',
     author_email='jim.holmstroem@gmail.com',
-    packages=['timeseriesdistance'],
+    packages=['timeseriesdistance', 'timeseriesdistance.tests'],
     include_package_data=True,
     version=VERSION,
     zip_safe=False,
