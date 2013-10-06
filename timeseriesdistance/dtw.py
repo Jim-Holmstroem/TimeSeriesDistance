@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from timeseriesdistance.metric import Metric
 
-from timeseriesdistance.path import lpc, D_from_c, min_path
+from timeseriesdistance.path import D_from_c, min_path
 
 def path_2_matrix(path, shape):
     """
@@ -26,6 +26,8 @@ def path_2_matrix(path, shape):
 
     return matrix
 
+def asdoublearray(a):
+    return np.asarray(a, np.double)
 
 class DTW(Metric):
     """
@@ -38,14 +40,14 @@ class DTW(Metric):
     f : ufunc
         Inner distance (or what it's called)
     """
-    def __init__(self, C_HV=1, C_D=10, f=np.square, verbose=False):
+    def __init__(self, C_HV=1., C_D=10., f=np.square, verbose=False):
         self.f = f
         self.verbose = verbose
         self.C_HV = C_HV
         self.C_D = C_D
 
     def __call__(self, a, b):
-        a, b = map(np.asarray, [a, b])
+        a, b = map(asdoublearray, [a, b])
         #local_cost_matrix
         c = self.f(np.subtract.outer(a, b))  # f(|..|)
         # Optimal warping path p_i = (m_i, n_i):
@@ -54,12 +56,13 @@ class DTW(Metric):
         # Monotonicity condition: i<j => n_i<n_j AND m_i<m_j
         # Step size  condition: p_{l-1}-p_l \in {(1,1), (1,0), (0,1)}  # NOTE just for now
 
+        print(c)
         D = D_from_c(
             c=c,
             C_D=self.C_D,
             C_HV=self.C_HV,
         )
-
+        print(D)
         # NOTE expanded recursion
         # TODO write down the recursive algorithm
         # find the minimum path in a gready manner (is this really the minimum? TODO)

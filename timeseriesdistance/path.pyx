@@ -5,8 +5,13 @@ from functools import partial
 from itertools import product, starmap
 
 import numpy as np
+cimport numpy as np
 
-def lpc(D, i, j, C_D, C_HV): # local path constraint
+cdef inline lpc(
+    np.ndarray[np.float64_t, ndim=2] D,
+    Py_ssize_t i, Py_ssize_t j,
+    double C_D, double C_HV
+): # local path constraint
     return (
         ((i-1, j-1), C_D *D[i-1, j-1]),
         ((i  , j-1), C_HV*D[i  , j-1]),
@@ -14,6 +19,9 @@ def lpc(D, i, j, C_D, C_HV): # local path constraint
     )
 
 def D_from_c(c, C_D, C_HV):
+    """
+    c : float matrix
+    """
     D = np.copy(c)
 
     D[0, 0] = 0
@@ -37,6 +45,9 @@ def D_from_c(c, C_D, C_HV):
     return D
 
 def min_path(D, C_D, C_HV):
+    """
+    D : float matrix
+    """
     i, j = map(lambda size: size-1, D.shape)
     path = [(i, j)]
     while not (i == 0 and j == 0):

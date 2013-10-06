@@ -31,7 +31,7 @@ def test_wav():
         )
     )))
 
-    assert_greater(DTW(verbose=True)(test1, test2), 0)
+    assert_greater(DTW(verbose=False)(test1, test2), 0)
 
 def test_trivial():
     assert_equal(DTW()(range(10), range(10)), 0)
